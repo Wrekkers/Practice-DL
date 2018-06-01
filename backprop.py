@@ -5,17 +5,14 @@ def forward(X, W1, b1, W2, b2):
     Z = 1/(1 + np.exp(-X.dot(W1) - b1))
     A = Z.dot(W2) + b2
     expA = np.exp(A)
-    Y = expA.sum(axis=1,keepdims = True)
-    return Y,Z
+    Y = expA / expA.sum(axis=1,keepdims = True)
+    return Y, Z
 
 def cost(T, Y):
     tot = T * np.log(Y)
     return tot.sum()
 
 def derivative_w2(Z, T, Y):
-
-    N, K = T.shape
-    M = Z.shape[1]
 
     return np.dot(Z.T,(T - Y))
 
@@ -24,7 +21,7 @@ def derivative_b2(T, Y):
     return (T - Y).sum(axis=0)
 
 def derivative_w1(X, Z, T, Y,  W2):
-    del2 = np.dot(T - Y, W2.T)
+    del2 = np.dot((T - Y), W2.T)
     del3 = del2 * (Z * (1 - Z))
     return (np.dot(X.T, del3))
 
@@ -72,14 +69,15 @@ def main():
 
     costs = []
 
-    for epoch in xrange(10000):
+    for epoch in xrange(100000):
         output, hidden = forward(X, W1,b1, W2, b2)
-        if epoch % 100 == 0:
+        if (epoch % 100 == 0):
             c = cost(T, output)
             P = np.argmax(output, axis=1)
             r = classification_rate(Y,P)
+            #print (P)
             print "cost: ", c, " classification_rate :", r
-            cost.append(c)
+            costs.append(c)
 
         W2 += learning_rate * derivative_w2(hidden, T, output)
         b2 += learning_rate * derivative_b2(T, output)
