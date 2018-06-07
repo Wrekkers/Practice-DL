@@ -7,14 +7,25 @@ Created on Wed Jun  6 12:12:16 2018
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 
 
 
-def view_data():
+def view_data(X,Y):
     
     ####
-    raise NotImplementedError
+    expression = {0:'Angry', 1:'Disgust', 2:'Fear', 3:'Happy',
+                     4:'Sad', 5:'Surprise', 6:'Neutral'}
+    i = 0
+    for img in X:
+        plt.imshow(img.reshape(48, 48), cmap='gray')
+        plt.title(expression[Y[i]])
+        plt.show()
+        i += 1
+        prompt = input('Enter (y/n) :')
+        if (prompt.lower() == 'y' or i > 10):
+            break
     ####
     
 
@@ -27,10 +38,8 @@ def get_data(filename):
     
     Y_train = []
     Y_test = []
-    Y_score = []
     X_train = []
     X_test = []
-    X_score = []
     
     for line in raw:
         if (first):
@@ -38,27 +47,29 @@ def get_data(filename):
         
         else :
             row = line.split(',')
-            if (row[2].rstrip() == 'Training'):
+            if (row[2].rstrip() == 'Training' or row[2].rstrip() == 'PublicTest'):
                 Y_train.append(int(row[0]))
                 X_train.append([int (pixel_val) for pixel_val in row[1].split(' ')])
-            if (row[2].rstrip() == 'PublicTest'):
+            if (row[2].rstrip() == 'PrivateTest'):
                 Y_test.append(int(row[0]))
                 X_test.append([int (pixel_val) for pixel_val in row[1].split(' ')])
-            if (row[2].rstrip() == 'PrivateTest'):
-                Y_score.append(int(row[0]))
-                X_score.append([int (pixel_val) for pixel_val in row[1].split(' ')])
+
     
     ####
+    X_train, X_test = np.array(X_train)/255.0, np.array(X_test) / 255.0
+    Y_train, Y_test = np.array(Y_train) , np.array(Y_test)
     
-    return 0
+    return X_train, Y_train, X_test, Y_test
 
 
 def main():
     
-    filename = 'fer2013.csv'
+    filename = '../fer2013.csv'
     #train_set,test_set,score_set = get_data(filename) 
     
-    get_data(filename) 
+    X,Y,X_t,Y_t = get_data(filename) 
+    #view_data(X, Y)
+    
     
 if __name__ == '__main__':
     main()
